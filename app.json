@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "tribe",
-    "slug": "tribe",
+    "slug": "the-circles-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -19,7 +19,7 @@
       "associatedDomains": [
         "applinks:circles-app.ngrok.io"
       ],
-      "bundleIdentifier": "com.circles"
+      "bundleIdentifier": "com.thecirclesapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -48,7 +48,22 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router"
-    ]
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow circles to use your location."
+        }
+      ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "2875df28-188c-44a4-96ae-eefa97617de6"
+      }
+    },
+    "owner": "jimstef"
   }
 }

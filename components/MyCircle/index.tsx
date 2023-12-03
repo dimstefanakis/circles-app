@@ -154,8 +154,7 @@ const CirclesView: React.FC = () => {
         <View marginBottom={20} zIndex={2} w="100%" flexWrap='wrap' justifyContent='space-evenly' flexDirection='row'>
           {people.map((person, index) => {
             return (
-              <Avatar circular size={60} my={10} mx={4} onPress={() => {
-                console.log('pressed')
+              <Avatar key={index} circular size={60} my={10} mx={4} onPress={() => {
                 router.push('/add/johndoe1')
               }}
               >

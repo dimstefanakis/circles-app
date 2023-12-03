@@ -1,7 +1,6 @@
 import MapView from 'react-native-maps';
-import { Button } from 'tamagui';
+import { Button, Input, YStack } from 'tamagui';
 import { ChevronDown } from '@tamagui/lucide-icons';
-import { YStack } from 'tamagui';
 import { useRouter } from 'expo-router';
 
 function FriendMap() {

@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { Github, Twitter, Circle, Send } from "@tamagui/lucide-icons";
+import { Github, Calendar, Twitter, Circle, Send } from "@tamagui/lucide-icons";
 import { Link, useRouter, Redirect } from "expo-router";
-import { PanResponder, Dimensions } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, runOnJS, withTiming } from 'react-native-reanimated';
-import { View, Input } from "tamagui";
+import { PanResponder, Dimensions, Pressable } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, runOnJS, withTiming, withSpring } from 'react-native-reanimated';
+import { HoldItem } from 'react-native-hold-menu';
+import { View, Text, Input } from "tamagui";
 import {
   Button,
   H1,
@@ -19,13 +20,14 @@ import { Session } from '@supabase/supabase-js'
 import fetch from 'cross-fetch';
 import Post, { PostType } from "../components/Post";
 import HubItems from "../components/HubItems";
-import { supabase, getPosts } from "../utils/supabase";
+import { supabase, getCirclePosts } from "../utils/supabase";
 import useUser from "../hooks/useUser";
 import FriendMap from "../components/FriendMap";
 import MyCircle from "../components/MyCircle";
 import { MySafeAreaView } from "../components/MySafeAreaView";
 
 // import { MyStack } from "../components/MyStack";
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
@@ -33,12 +35,12 @@ const width = Dimensions.get('window').width;
 export default function Home() {
   const router = useRouter();
   const { user, session, loading } = useUser()
+  const [isDynamicCirclePressed, setIsDynamicCirclePressed] = useState(false)
   const [posts, setPosts] = useState<PostType[]>([])
   const [isRevealing, setIsRevealing] = useState(false)
   // const translateY = useRef(new Animated.Value(-height)).current;
   const circleHeight = useSharedValue(50);
   const circleWidth = useSharedValue(50);
-  const circleBorderRadius = useSharedValue(25);
   const transformY = useSharedValue(0);
   const hubOpacity = useSharedValue(0);
   const feedOpacity = useSharedValue(1);
@@ -55,12 +57,6 @@ export default function Home() {
     transform: [{ translateY: transformY.value }],
   }));
 
-  const circleStyle = useAnimatedStyle(() => ({
-    height: circleHeight.value,
-    width: circleWidth.value,
-    borderRadius: circleBorderRadius.value,
-  }));
-
   const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: (evt, gestureState) => true,
     onPanResponderMove: (evt, gestureState) => {
@@ -71,15 +67,15 @@ export default function Home() {
         if (isRevealing) {
           hubOpacity.value = (1 - gestureState.dy * 10 / height);  // Calculate opacity based on drag position
           feedOpacity.value = (gestureState.dy * 10 / height);
-          circleHeight.value = (height - gestureState.dy * 2);
-          circleWidth.value = (width - gestureState.dy * 2);
-          circleBorderRadius.value = (gestureState.dy);
+          // circleHeight.value = (height - gestureState.dy * 2);
+          // circleWidth.value = (width - gestureState.dy * 2);
+          // circleBorderRadius.value = (gestureState.dy);
         } else {
           hubOpacity.value = (gestureState.dy * 10 / height);  // Calculate opacity based on drag position
           feedOpacity.value = (1 - gestureState.dy * 10 / height);
-          circleHeight.value = (50 + gestureState.dy * 2);
-          circleWidth.value = (50 + gestureState.dy * 2);
-          circleBorderRadius.value = (gestureState.dy);
+          // circleHeight.value = (50 + gestureState.dy * 2);
+          // circleWidth.value = (50 + gestureState.dy * 2);
+          // circleBorderRadius.value = (gestureState.dy);
         }
       }
     },
@@ -99,9 +95,9 @@ export default function Home() {
         });
 
       } else if (gestureState.dy > 50 && !isRevealing) {  // If swipe down is significant and view is closed
-        circleHeight.value = withTiming(height, { duration: 200 });
-        circleWidth.value = withTiming(width, { duration: 200 });
-        circleBorderRadius.value = withTiming(0, { duration: 200 });
+        // circleHeight.value = withTiming(height, { duration: 200 });
+        // circleWidth.value = withTiming(width, { duration: 200 });
+        // circleBorderRadius.value = withTiming(0, { duration: 200 });
         hubOpacity.value = withTiming(1, { duration: 200 }, (isFinished) => {
           if (isFinished) {
             runOnJS(setIsRevealing)(true);
@@ -126,8 +122,7 @@ export default function Home() {
   });
 
   useEffect(() => {
-    console.log("session", session)
-    if ((session && !session?.access_token) || !loading && !session) {
+    if ((session && !session?.access_token) || (!loading && !session)) {
       router.replace('/login')
     }
   }, [session, loading])
@@ -146,7 +141,10 @@ export default function Home() {
   // }
 
   async function fetchPosts() {
-    const { data, error } = await getPosts(user.id)
+    console.log('getting')
+    const { data, error } = await getCirclePosts(user.id, user.circle.id)
+    console.log('got')
+
     if (data) {
       // @ts-ignore
       setPosts(data)
@@ -161,7 +159,6 @@ export default function Home() {
 
   return (
     <MySafeAreaView>
-
       <Swiper
         loop={false}
         showsPagination={false}
@@ -169,7 +166,6 @@ export default function Home() {
         {...panResponder.panHandlers}>
         <YStack flex={1}>
           <MyCircle />
-
         </YStack>
         <YStack>
           <Animated.View style={
@@ -199,21 +195,7 @@ export default function Home() {
           >
             {/* <Button circular backgroundColor="transparent" size="$5" scaleIcon={1.4} icon={Circle}>
           </Button> */}
-            <Animated.View
-              // style={[circleStyle, {
-              //   borderRadius: 25,
-              //   borderWidth: 2,
-              //   borderColor: 'white',
-              // }]}
-              style={{
-                height: 60,
-                width: 60,
-                borderRadius: 100,
-                borderWidth: 4,
-                borderColor: 'white',
-              }}
-            >
-            </Animated.View>
+            <DynamicCircle />
           </XStack>
           <Animated.View style={
             [animatedFeedStyle,
@@ -233,77 +215,133 @@ export default function Home() {
               ))}
             </YStack>
           </Animated.View>
-          {/* <YStack
-        space="$4"
-        maxWidth={600}
-      >
-        <H1 textAlign="center">Welcome to Tamagui.</H1>
-        <Paragraph textAlign="center">
-          Here&apos;s a basic starter to show navigating from one screen to
-          another.
-        </Paragraph>
-      </YStack>
-
-      <YStack space="$2.5">
-        <Button onPress={() => router.push("/users/testuser")}>
-          Go to user page
-        </Button>
-        <Button onPress={() => router.push("/tabs")}>Go to tabs page</Button>
-      </YStack>
-
-      <YStack space="$5">
-        <YGroup
-          bordered
-          separator={<Separator />}
-          theme="green"
-        >
-          <YGroup.Item>
-            <Link
-              asChild
-              href="https://twitter.com/natebirdman"
-              target="_blank"
-            >
-              <ListItem
-                hoverTheme
-                title="Nate"
-                pressTheme
-                icon={Twitter}
-              />
-            </Link>
-          </YGroup.Item>
-          <YGroup.Item>
-            <Link
-              asChild
-              href="https://github.com/tamagui/tamagui"
-              target="_blank"
-            >
-              <ListItem
-                hoverTheme
-                pressTheme
-                title="Tamagui"
-                icon={Github}
-              />
-            </Link>
-          </YGroup.Item>
-          <YGroup.Item>
-            <Link
-              asChild
-              href="https://github.com/ivopr/tamagui-expo"
-              target="_blank"
-            >
-              <ListItem
-                hoverTheme
-                pressTheme
-                title="This Template"
-                icon={Github}
-              />
-            </Link>
-          </YGroup.Item>
-        </YGroup>
-      </YStack> */}
         </YStack>
       </Swiper>
     </MySafeAreaView>
 
   );
+}
+
+function DynamicCircle() {
+  const router = useRouter();
+  const [isDynamicCirclePressed, setIsDynamicCirclePressed] = useState(false)
+  const dynamicCircleHeight = useSharedValue(60);
+  const dynamicCircleWidth = useSharedValue(60);
+  const dynamicCircleBorderRadius = useSharedValue(100);
+  const contentOpacity = useSharedValue(0);
+
+  const dynamicCircleStyle = useAnimatedStyle(() => ({
+    height: dynamicCircleHeight.value,
+    width: dynamicCircleWidth.value,
+    borderRadius: dynamicCircleBorderRadius.value,
+  }));
+
+  const contentStyle = useAnimatedStyle(() => ({
+    opacity: contentOpacity.value,
+  }));
+
+  function onClickEvent() {
+    router.push('/friend_map')
+  }
+
+  function onDynamicCirclePress() {
+    'worklet';
+    if (isDynamicCirclePressed) {
+      dynamicCircleHeight.value = withSpring(60, {
+        damping: 18,
+        mass: 1,
+        stiffness: 140,
+        overshootClamping: false,
+        restDisplacementThreshold: 0.01,
+        restSpeedThreshold: 2,
+      });
+      dynamicCircleWidth.value = withSpring(60, {
+        damping: 18,
+        mass: 1,
+        stiffness: 140,
+        overshootClamping: false,
+        restDisplacementThreshold: 0.01,
+        restSpeedThreshold: 2,
+      });
+      contentOpacity.value = withSpring(0, {
+        damping: 18,
+        mass: 1,
+        stiffness: 140,
+        overshootClamping: false,
+        restDisplacementThreshold: 0.01,
+        restSpeedThreshold: 2,
+      });
+    } else {
+      dynamicCircleBorderRadius.value = withSpring(40, {
+        damping: 18,
+        mass: 1,
+        stiffness: 140,
+        overshootClamping: false,
+        restDisplacementThreshold: 0.01,
+        restSpeedThreshold: 2,
+      });
+
+      dynamicCircleHeight.value = withSpring(150, {
+        damping: 18,
+        mass: 1,
+        stiffness: 140,
+        overshootClamping: false,
+        restDisplacementThreshold: 0.01,
+        restSpeedThreshold: 2,
+      });
+      dynamicCircleWidth.value = withSpring(width - 20, {
+        damping: 18,
+        mass: 1,
+        stiffness: 140,
+        overshootClamping: false,
+        restDisplacementThreshold: 0.01,
+        restSpeedThreshold: 2,
+      });
+      contentOpacity.value = withSpring(1, {
+        damping: 18,
+        mass: 1,
+        stiffness: 140,
+        overshootClamping: false,
+        restDisplacementThreshold: 0.01,
+        restSpeedThreshold: 2,
+      });
+
+    }
+    setIsDynamicCirclePressed(!isDynamicCirclePressed);
+  }
+
+  return (
+    <AnimatedPressable
+      onPress={onDynamicCirclePress}
+      style={[dynamicCircleStyle, {
+        borderWidth: 7,
+        borderColor: 'white',
+        overflow: 'hidden',
+      }]}
+    >
+      <Animated.View
+        style={[contentStyle,
+          {
+            padding: 20,
+          }
+        ]}
+      >
+        <View
+          flexDirection="column"
+          h="100%"
+        >
+          <Text
+            fontSize="$8"
+            fontWeight="bold"
+            flex={1}
+          >0 notifications</Text>
+          <XStack space="$2">
+            <Button icon={<Calendar />} onPress={onClickEvent} w="100%">
+              Create event
+            </Button>
+          </XStack>
+        </View>
+      </Animated.View>
+    </AnimatedPressable >
+  )
 }

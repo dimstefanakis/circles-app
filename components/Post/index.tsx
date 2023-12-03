@@ -5,7 +5,7 @@ export type PostType =
   Database['public']['Tables']['posts']['Row'] & {
     text_posts: Database['public']['Tables']['text_posts']['Row'][]
   } & {
-    user_id: {
+    user: {
       username: string
       avatar_url: string
       full_name: string
@@ -22,7 +22,7 @@ function Post({ post }: PostProps) {
     <YStack space='$4'>
       <XStack space='$2'>
         <Avatar circular size="$3">
-          <Avatar.Image src={post.user_id.avatar_url} />
+          <Avatar.Image src={post.user.avatar_url} />
           <Avatar.Fallback bc="gray" />
         </Avatar>
         <YStack space='$1' justifyContent='center'>
@@ -30,7 +30,7 @@ function Post({ post }: PostProps) {
             fontSize="$4"
             marginLeft="$1"
             fontWeight="bold"
-          >{post.user_id.username}</Text>
+          >{post.user.username}</Text>
           {/* <Text color='gray'>{post.created_at}</Text> */}
         </YStack>
       </XStack>
