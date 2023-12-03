@@ -2,6 +2,8 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
+// #import <MovementSdk/MovementSdk.h>
+// #import <MovementSdk/MovementSdk-Swift.h>
 
 @implementation AppDelegate
 
@@ -12,6 +14,17 @@
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
+  // [[FSQMovementSdkManager shared] configureWithConsumerKey:@"CONSUMER_KEY"
+  //                                                   secret:@"CONSUMER_SECRET"
+  //                                               oauthToken:@"YOUR_OAUTH_TOKEN"
+  //                                                 delegate:nil
+  //                                               completion:^(BOOL success, NSError *error) {
+  //                                                   if (success) {
+  //                                                       // Handle successful configuration
+  //                                                   } else {
+  //                                                       // Handle error
+  //                                                   }
+  //                                               }];
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }

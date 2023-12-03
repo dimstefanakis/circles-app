@@ -27,7 +27,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>com.circles</string>
+          <string>com.thecirclesapp</string>
         </array>
       </dict>
       <dict>
