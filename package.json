@@ -14,7 +14,7 @@
     "@react-navigation/stack": "^6.3.20",
     "@supabase/supabase-js": "^2.38.4",
     "@tamagui/babel-plugin": "^1.75.9",
-    "@tamagui/config": "^1.75.8",
+    "@tamagui/config": "^1.75.9",
     "@tamagui/lucide-icons": "^1.75.9",
     "@types/aes-js": "^3.1.4",
     "aes-js": "^3.1.2",
@@ -46,7 +46,7 @@
     "react-native-svg": "13.9.0",
     "react-native-swiper": "^1.6.0",
     "react-native-url-polyfill": "^2.0.0",
-    "tamagui": "^1.75.8"
+    "tamagui": "^1.75.9"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

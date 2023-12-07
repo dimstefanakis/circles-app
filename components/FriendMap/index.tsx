@@ -1,23 +1,34 @@
 import MapView from 'react-native-maps';
-import { Button, Input, YStack } from 'tamagui';
+import { Button, Input, YStack, XStack } from 'tamagui';
 import { ChevronDown } from '@tamagui/lucide-icons';
+import { Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
+
+const { width, height } = Dimensions.get('window');
 
 function FriendMap() {
   const router = useRouter();
   return (
     <YStack flex={1}>
-      <Button
+      <XStack
         position='absolute'
         top={20}
-        right={20}
         zIndex={1}
-        circular
-        icon={<ChevronDown size='$2' />}
-        onPress={() => {
-          router.push('/')
-        }}
-      ></Button>
+        px={10}
+        w={width}
+        justifyContent='space-between'
+      >
+        <Input placeholder='Search' w={width - 80 }/>
+        <Button
+          circular
+          mx={2}
+          icon={<ChevronDown size='$2' />}
+          onPress={() => {
+            router.push('/')
+          }}
+        ></Button>
+
+      </XStack>
       <MapView
         style={{ flex: 1 }}
         initialRegion={{
